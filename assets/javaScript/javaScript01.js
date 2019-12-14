@@ -39,10 +39,7 @@ $(document).ready(function() {
         cityNameUppercase = cityNameInput.toUpperCase();
         console.log(cityNameInput);
         if(cityNameInput != '') {
-            
-            ajaxSearch(cityNameInput);          
-            saveToLocal(cityNameInput);
-            displayCityArray();
+            $(".searchBtn").on("click", ajaxSearch(cityNameInput));
             $(".savedCityBtn").on("click", savedCityBtn);
         }
         // Transfer content to HTML
@@ -71,6 +68,7 @@ $(document).ready(function() {
 
         ajaxSearch(cityNameInput);
     }
+
     function geoLocationWeather(latitude,longitude){
         // Here we are building the URL we need to query the database
         if (location.protocol === 'http:') {
@@ -238,136 +236,150 @@ $(document).ready(function() {
             queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?q=' +
             b + '&appid=' + APIKey;
         }
+        console.log(queryForcast);
         // Here we run our AJAX call to the OpenWeatherMap API
         $.ajax({
-        url: queryForcast,
-        method: "GET"
-        })
-        // We store all of the retrieved data inside of an object called "response"
-        .then(function(response) {
-            $('.resultContent').empty();
-            // Log the queryURL
-            console.log(queryForcast);
-    
-            // Log the resulting object
-            console.log(response);
-            var stringifyResponse = JSON.stringify(response);
-            for(var i = 0; i < 1; i++){
-                var cityName = JSON.stringify(response.city.name);
-                var cityLat = JSON.stringify(response.city.coord.lat);
-                var cityLon = JSON.stringify(response.city.coord.lon);
-                var cityDate = response.list[i].dt;
-                var displayDate = moment.unix(cityDate).utc();
-                var cityWeatherIcon = response.list[i].weather[i-i].icon;
-                var iconURL = 'http://openweathermap.org/img/w/' + cityWeatherIcon + '.png';
-                var cityTemp = JSON.stringify(response.list[i].main.temp);
-                var tempF = (cityTemp - 273.15) * 1.80 + 32;
-                var cityHumidity = JSON.stringify(response.list[i].main.humidity);
-                var cityWindSpeed = JSON.stringify(response.list[i].wind.speed);
+            type:'GET',
+            url: queryForcast,
+            dataType:'JSON',
+            success: function(response) {
+                $('.resultContent').empty();
+                // Log the queryURL
+                console.log(queryForcast);
+        
+                // Log the resulting object
+                console.log(response);
+                var stringifyResponse = JSON.stringify(response);
+                for(var i = 0; i < 1; i++) {
+                    var cityName = JSON.stringify(response.city.name);
+                    var cityLat = JSON.stringify(response.city.coord.lat);
+                    var cityLon = JSON.stringify(response.city.coord.lon);
+                    var cityDate = response.list[i].dt;
+                    var displayDate = moment.unix(cityDate).utc();
+                    var cityWeatherIcon = response.list[i].weather[i-i].icon;
+                    var iconURL = 'http://openweathermap.org/img/w/' + cityWeatherIcon + '.png';
+                    var cityTemp = JSON.stringify(response.list[i].main.temp);
+                    var tempF = (cityTemp - 273.15) * 1.80 + 32;
+                    var cityHumidity = JSON.stringify(response.list[i].main.humidity);
+                    var cityWindSpeed = JSON.stringify(response.list[i].wind.speed);
 
-                console.log(cityDate);
-                console.log(displayDate.toString());
-                console.log('Temperature: ' + tempF.toFixed(2) + '\xB0F');
+                    console.log(cityDate);
+                    console.log(displayDate.toString());
+                    console.log('Temperature: ' + tempF.toFixed(2) + '\xB0F');
 
-                // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
-                if (location.protocol === 'http:') {
-                    uvindexURL = 'http://api.openweathermap.org/data/2.5/uvi?appid=' +
-                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
-                }
-                else {
-                    uvindexURL = 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
-                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
-                }
-                $.ajax({
-                url: uvindexURL,
-                method: "GET"
-                })
-                // We store all of the retrieved data inside of an object called "response"
-                .then(function(uvResponse) {
-                    $('.resultContent').empty();
-                    // Log the queryURL
-                    console.log(uvResponse);
-                    var cityUVIndex = JSON.stringify(uvResponse.value);
-                    console.log(cityUVIndex);
+                    // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
+                    if (location.protocol === 'http:') {
+                        uvindexURL = 'http://api.openweathermap.org/data/2.5/uvi?appid=' +
+                        APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
+                    }
+                    else {
+                        uvindexURL = 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
+                        APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
+                    }
+                    $.ajax({
+                    url: uvindexURL,
+                    method: "GET"
+                    })
+                    // We store all of the retrieved data inside of an object called "response"
+                    .then(function(uvResponse) {
+                        $('.resultContent').empty();
+                        // Log the queryURL
+                        console.log(uvResponse);
+                        var cityUVIndex = JSON.stringify(uvResponse.value);
+                        console.log(cityUVIndex);
 
-                    // Log the resulting object
-                    console.log(response);
-                    // var stringifyResponse = JSON.stringify(response);
-                    displayDiv = $('<div>').addClass('displayDiv col-md-12');
-                    title02El = $('<div>').addClass('currentDay col-md-12');
-                    cityNameEl = $('<div>').addClass('currentDay col-md-9');
-                    tempFEl = $('<div>').addClass('currentDay col-md-12');
-                    cityHumidityEl = $('<div>').addClass('currentDay col-md-12');
-                    cityWindSpeedEl = $('<div>').addClass('currentDay col-md-12');
-                    row01El = $('<div>').addClass('row');
-                    cityUVIndexTitleEl = $('<div>').addClass('currentDay');
-                    cityUVIndexValueEl = $('<div>').addClass('currentDay');
-                    weatherIconEl = $('<div>').addClass('currentDay col-md-4')
-                    weatherIcon = $('<img>').addClass('weatherIcon'); 
+                        // Log the resulting object
+                        console.log(response);
+                        // var stringifyResponse = JSON.stringify(response);
+                        displayDiv = $('<div>').addClass('displayDiv col-md-12');
+                        title02El = $('<div>').addClass('currentDay col-md-12');
+                        cityNameEl = $('<div>').addClass('currentDay col-md-9');
+                        tempFEl = $('<div>').addClass('currentDay col-md-12');
+                        cityHumidityEl = $('<div>').addClass('currentDay col-md-12');
+                        cityWindSpeedEl = $('<div>').addClass('currentDay col-md-12');
+                        row01El = $('<div>').addClass('row');
+                        cityUVIndexTitleEl = $('<div>').addClass('currentDay');
+                        cityUVIndexValueEl = $('<div>').addClass('currentDay');
+                        weatherIconEl = $('<div>').addClass('currentDay col-md-4')
+                        weatherIcon = $('<img>').addClass('weatherIcon'); 
 
-                    weatherIcon.css('text-align', 'left');
-                    weatherIcon.attr('src', iconURL)
-                    displayDiv.attr('dataIndex', i);
-                    displayDiv.css({'border': 'solid', 'border-width': '1px', 'border-color': '#777777', 'padding-bottom': '20px'});
-                    cityUVIndexTitleEl.css({'margin-bottom': '10px', 'margin-left': '30px', 'margin-right': '10px'});
-                    cityUVIndexValueEl.css({'background-color': '#ff0000', 'color': '#ffffff', 'margin-bottom': '10px', 'padding-left': '5px', 'padding-right': '5px', 'border-radius': '5px'});
-                    $('.resultContent').append(displayDiv);
+                        weatherIcon.css('text-align', 'left');
+                        weatherIcon.attr('src', iconURL)
+                        displayDiv.attr('dataIndex', i);
+                        displayDiv.css({'border': 'solid', 'border-width': '1px', 'border-color': '#777777', 'padding-bottom': '20px'});
+                        cityUVIndexTitleEl.css({'margin-bottom': '10px', 'margin-left': '30px', 'margin-right': '10px'});
+                        cityUVIndexValueEl.css({'background-color': '#ff0000', 'color': '#ffffff', 'margin-bottom': '10px', 'padding-left': '5px', 'padding-right': '5px', 'border-radius': '5px'});
+                        $('.resultContent').append(displayDiv);
 
-                    title02El.html('<h3>5-Day Forcast:</h3>');
-                    cityNameEl.html('<h3>' + cityName + ' ' + displayDate.format('DD/MM/YYYY') + '</h3>');
-                    tempFEl.text('Temperature: ' + tempF.toFixed(2) + '\xB0F');
-                    cityHumidityEl.text('Humidity: ' + cityHumidity + '\u0025');
-                    cityWindSpeedEl.text('Wind Speed: ' + cityWindSpeed + ' MPH');
-                    cityUVIndexTitleEl.text('UV Index:');
-                    cityUVIndexValueEl.text(cityUVIndex);
-
-                    displayDiv.append(cityNameEl);
-                    displayDiv.append(weatherIconEl);
-                    weatherIconEl.append(weatherIcon);
-                    displayDiv.append(tempFEl);
-                    displayDiv.append(cityHumidityEl);
-                    displayDiv.append(cityWindSpeedEl);
-                    displayDiv.append(row01El);
-                    row01El.append(cityUVIndexTitleEl);
-                    row01El.append(cityUVIndexValueEl);
-                    displayDiv.append(title02El);
-
-                    var forcastRow = $('<div>').addClass('row');
-                    forcastRow.css('font-size', '12px')
-                    displayDiv.append(forcastRow);
-
-                    for(i = 0; i < 5; i++) {
-                        cityDate = response.list[i * 8].dt;
-                        displayDate = moment.unix(cityDate).utc();
-                        cityWeatherIcon = response.list[i * 8].weather[(i * 8)-(i * 8)].icon;
-                        iconURL = 'http://openweathermap.org/img/w/' + cityWeatherIcon + '.png';
-                        cityTemp = JSON.stringify(response.list[i * 8].main.temp);
-                        tempF = (cityTemp - 273.15) * 1.80 + 32;
-                        cityHumidity = JSON.stringify(response.list[i * 8].main.humidity);
-                        cityWindSpeed = JSON.stringify(response.list[i * 8].wind.speed);
-
-                        var forcastDiv = $('<div>').addClass('col-md-2 forcastDiv');
-                        var cityDateEl = $('<div>').addClass('forcastDay');
-                        tempFEl = $('<div>').addClass('forcastDay');
-                        cityHumidityEl = $('<div>').addClass('forcastDay');
-                        weatherIcon = $('<img>').addClass('weatherIcon');
-                        
-                        cityDateEl.text(displayDate.format('DD/MM/YYYY'))
-                        weatherIcon.attr('src', iconURL);
+                        title02El.html('<h3>5-Day Forcast:</h3>');
+                        cityNameEl.html('<h3>' + cityName + ' ' + displayDate.format('DD/MM/YYYY') + '</h3>');
                         tempFEl.text('Temperature: ' + tempF.toFixed(2) + '\xB0F');
                         cityHumidityEl.text('Humidity: ' + cityHumidity + '\u0025');
+                        cityWindSpeedEl.text('Wind Speed: ' + cityWindSpeed + ' MPH');
+                        cityUVIndexTitleEl.text('UV Index:');
+                        cityUVIndexValueEl.text(cityUVIndex);
 
-                        forcastDiv.attr('dataIndex', i);
-                        forcastDiv.css({'background-color': '#03fcf2', 'margin': '8px','text-align': 'left', 'padding-left': '5px'});
-                        forcastRow.append(forcastDiv);
-                        forcastDiv.append(cityDateEl);
-                        forcastDiv.append(weatherIcon);
-                        forcastDiv.append(tempFEl);
-                        forcastDiv.append(cityHumidityEl);
-                    }
-                });
+                        displayDiv.append(cityNameEl);
+                        displayDiv.append(weatherIconEl);
+                        weatherIconEl.append(weatherIcon);
+                        displayDiv.append(tempFEl);
+                        displayDiv.append(cityHumidityEl);
+                        displayDiv.append(cityWindSpeedEl);
+                        displayDiv.append(row01El);
+                        row01El.append(cityUVIndexTitleEl);
+                        row01El.append(cityUVIndexValueEl);
+                        displayDiv.append(title02El);
+
+                        var forcastRow = $('<div>').addClass('row');
+                        forcastRow.css('font-size', '12px')
+                        displayDiv.append(forcastRow);
+
+                        for(i = 0; i < 5; i++) {
+                            cityDate = response.list[i * 8].dt;
+                            displayDate = moment.unix(cityDate).utc();
+                            cityWeatherIcon = response.list[i * 8].weather[(i * 8)-(i * 8)].icon;
+                            iconURL = 'http://openweathermap.org/img/w/' + cityWeatherIcon + '.png';
+                            cityTemp = JSON.stringify(response.list[i * 8].main.temp);
+                            tempF = (cityTemp - 273.15) * 1.80 + 32;
+                            cityHumidity = JSON.stringify(response.list[i * 8].main.humidity);
+                            cityWindSpeed = JSON.stringify(response.list[i * 8].wind.speed);
+
+                            var forcastDiv = $('<div>').addClass('col-md-2 forcastDiv');
+                            var cityDateEl = $('<div>').addClass('forcastDay');
+                            tempFEl = $('<div>').addClass('forcastDay');
+                            cityHumidityEl = $('<div>').addClass('forcastDay');
+                            weatherIcon = $('<img>').addClass('weatherIcon');
+                            
+                            cityDateEl.text(displayDate.format('DD/MM/YYYY'))
+                            weatherIcon.attr('src', iconURL);
+                            tempFEl.text('Temperature: ' + tempF.toFixed(2) + '\xB0F');
+                            cityHumidityEl.text('Humidity: ' + cityHumidity + '\u0025');
+
+                            forcastDiv.attr('dataIndex', i);
+                            forcastDiv.css({'background-color': '#03fcf2', 'margin': '8px','text-align': 'left', 'padding-left': '5px'});
+                            forcastRow.append(forcastDiv);
+                            forcastDiv.append(cityDateEl);
+                            forcastDiv.append(weatherIcon);
+                            forcastDiv.append(tempFEl);
+                            forcastDiv.append(cityHumidityEl);
+                            saveToLocal(b);
+                            displayCityArray();
+                        }
+                    });                  
+                }
+            },
+            error: function(){
+                alert("Error, 404 (not found)!")
             }
         });
+        // $.ajax({
+        // url: queryForcast,
+        // method: "GET"
+        // })
+        // // We store all of the retrieved data inside of an object called "response"
+        // .then(function(response) {
+            
+        // });
     }
 
     function getLocation() {

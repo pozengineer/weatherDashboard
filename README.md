@@ -66,6 +66,6 @@ This application was built using:
 -   jQuery: JavaScript library that enables HTML document traversal and manipulation, event handling, animation,
     and Ajax much simpler with an easy-to-use API
 
-![weatherDashboard tablet](assets/images/weatherDashboard01.jpg)
+![weatherDashboard desktop](assets/images/weatherDashboard01.jpg)
 ![weatherDashboard tablet](assets/images/weatherDashboard.jpg)
 ![weatherDashboard iphoneX](assets/images/weatherDashboard.jpg)

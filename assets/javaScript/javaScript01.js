@@ -17,12 +17,14 @@ $(document).ready(function() {
     // This is our API key
     var APIKey = '20fbd5d33642471f44e32d9d9f0a2317';
     // 'https://api.openweathermap.org/data/2.5/forecast?q=sydney,aus&mode=xml&appid='
+    var queryURL;
 
     getLocation();
     displayCityArray();
 
     $(".searchBtn").on("click", searchBtn);
     $(".savedCityBtn").on("click", savedCityBtn);
+    $(".clearBtn").on("click", clearList);
 
     function searchBtn(event) {
         // This 'preventDefault' method tells the user agent that if the event does not get explicitly
@@ -37,15 +39,7 @@ $(document).ready(function() {
         cityNameUppercase = cityNameInput.toUpperCase();
         console.log(cityNameInput);
         if(cityNameInput != '') {
-            var queryURL;
-            // if (location.protocol === 'http:') {
-            //     queryURL = 'http://api.openweathermap.org/data/2.5/weather?q=' +
-            //     cityNameInput + '&units=imperial&appid=' + APIKey;
-            // }
-            // else {
-            //     queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' +
-            //     cityNameInput + '&units=imperial&appid=' + APIKey;
-            // }
+            
             ajaxSearch(cityNameInput);          
             saveToLocal(cityNameInput);
             displayCityArray();
@@ -79,8 +73,14 @@ $(document).ready(function() {
     }
     function geoLocationWeather(latitude,longitude){
         // Here we are building the URL we need to query the database
-        var queryURL = 'https://api.openweathermap.org/data/2.5/weather?lat=' +
-        latitude + '&lon=' + longitude + '&appid=' + APIKey;
+        if (location.protocol === 'http:') {
+            queryURL = 'http://api.openweathermap.org/data/2.5/weather?lat=' +
+            latitude + '&lon=' + longitude + '&appid=' + APIKey;
+        }
+        else {
+            queryURL = 'https://api.openweathermap.org/data/2.5/weather?lat=' +
+            latitude + '&lon=' + longitude + '&appid=' + APIKey;
+        }
         // Here we run our AJAX call to the OpenWeatherMap API
         $.ajax({
         url: queryURL,
@@ -111,9 +111,16 @@ $(document).ready(function() {
                 console.log(displayDate.toString());
                 console.log('Temperature: ' + tempF.toFixed(2) + '\xB0F');
                 // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
+                if (location.protocol === 'http:') {
+                    var uvindexURL = 'http://api.openweathermap.org/data/2.5/uvi?appid=' +
+                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
+                }
+                else {
+                    uvindexURL = 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
+                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
+                }
                 $.ajax({
-                url: 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
-                APIKey + '&lat=' + cityLat + '&lon=' + cityLon,
+                url: uvindexURL,
                 method: "GET"
                 })
                 // We store all of the retrieved data inside of an object called "response"
@@ -166,8 +173,14 @@ $(document).ready(function() {
                     row01El.append(cityUVIndexValueEl);
                     displayDiv.append(title02El);
 
-                    var queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?lat=' +
-                    cityLat + '&lon=' + cityLon + '&appid=' + APIKey;
+                    if (location.protocol === 'http:') {
+                        var queryForcast = 'http://api.openweathermap.org/data/2.5/forecast?lat=' +
+                        cityLat + '&lon=' + cityLon + '&appid=' + APIKey;
+                    }
+                    else {
+                        queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?lat=' +
+                        cityLat + '&lon=' + cityLon + '&appid=' + APIKey;
+                    }
                     // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
                     $.ajax({
                     url: queryForcast,
@@ -217,12 +230,14 @@ $(document).ready(function() {
 
     function ajaxSearch(b){
         // Here we are building the URL we need to query the database
-        var queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' +
-        b + '&units=imperial&appid=' + APIKey;
-
-        var queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?q=' +
-        b + '&appid=' + APIKey;
-
+        if (location.protocol === 'http:') {
+            queryForcast = 'http://api.openweathermap.org/data/2.5/forecast?q=' +
+            b + '&appid=' + APIKey;
+        }
+        else {
+            queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?q=' +
+            b + '&appid=' + APIKey;
+        }
         // Here we run our AJAX call to the OpenWeatherMap API
         $.ajax({
         url: queryForcast,
@@ -255,9 +270,16 @@ $(document).ready(function() {
                 console.log('Temperature: ' + tempF.toFixed(2) + '\xB0F');
 
                 // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
+                if (location.protocol === 'http:') {
+                    uvindexURL = 'http://api.openweathermap.org/data/2.5/uvi?appid=' +
+                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
+                }
+                else {
+                    uvindexURL = 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
+                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon;
+                }
                 $.ajax({
-                url: 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
-                APIKey + '&lat=' + cityLat + '&lon=' + cityLon,
+                url: uvindexURL,
                 method: "GET"
                 })
                 // We store all of the retrieved data inside of an object called "response"
@@ -403,7 +425,7 @@ $(document).ready(function() {
             var index = search(userInputUppercase, savedCityJSON);
             console.log(index);
             if(index) {
-                alert('City already saved!')
+                // alert('City already saved!')
             }
             else {
                 savedCityJSON = JSON.parse(savedCityString);
@@ -452,6 +474,24 @@ $(document).ready(function() {
         }
     }
 
+    function clearList(event) {
+        // This 'preventDefault' method tells the user agent that if the event does not get explicitly
+        // handled, its default action should not be taken as it normally would be.
+        event.preventDefault(event);
+        // The stopPropagation() method stops the bubbling of an event to parent elements, preventing
+        // any parent handlers from being notified of the event. You can use the method event.isPropagationStopped()
+        // to know whether this method was ever called (on that event object).
+        event.stopPropagation(event);
+        var userClearSelect = event.target;
+        var clearSelect = userClearSelect.matches("button");
+        if (clearSelect) {
+            console.log("clear button clicked");
+            // $('.inputTextArea').val('');
+            $('.savedCityDisplay').empty();
+            localStorage.clear();
+        }
+    }
+
     // Current Date and Time
     var m = moment();
     console.log(m);
@@ -487,45 +527,12 @@ $(document).ready(function() {
 
     setInterval(update, 1000);
 
-    // currentDayEl.textContent = m.format("dddd DD MMMM YYYY");
+    currentDayEl.textContent = m.format("dddd DD MMMM YYYY");
 
     function displayTimeEl() {
         var timeIdEl = document.querySelectorAll(".timeId");
         var timeText = timeIdEl[0].textContent;
         console.log(timeText);
-    }
-
-    function inputData(event) {
-        // This 'preventDefault' method tells the user agent that if the event does not get explicitly
-        // handled, its default action should not be taken as it normally would be.
-        event.preventDefault(event);
-        // The stopPropagation() method stops the bubbling of an event to parent elements, preventing
-        // any parent handlers from being notified of the event. You can use the method event.isPropagationStopped()
-        // to know whether this method was ever called (on that event object).
-        event.stopPropagation(event);
-        var userTextBoxSelect = event.target;
-        var textBoxSelect = event.target.matches("textArea");
-        if (textBoxSelect) {
-            console.log("this is what user clicked " + userTextBoxSelect.getAttribute("data-index"));
-        }
-    }
-
-    function clearList(event) {
-        // This 'preventDefault' method tells the user agent that if the event does not get explicitly
-        // handled, its default action should not be taken as it normally would be.
-        event.preventDefault(event);
-        // The stopPropagation() method stops the bubbling of an event to parent elements, preventing
-        // any parent handlers from being notified of the event. You can use the method event.isPropagationStopped()
-        // to know whether this method was ever called (on that event object).
-        event.stopPropagation(event);
-        var userClearSelect = event.target;
-        var clearSelect = userClearSelect.matches("button");
-        if (clearSelect) {
-            console.log("clear button clicked");
-            $('.inputTextArea').val('');
-            // $('.inputTextArea').empty();
-            localStorage.clear();
-        }
     }
 
     function getFormattedMinutes() {

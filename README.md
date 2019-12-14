@@ -67,5 +67,5 @@ This application was built using:
     and Ajax much simpler with an easy-to-use API
 
 ![weatherDashboard desktop](assets/images/weatherDashboard01.jpg)
-![weatherDashboard tablet](assets/images/weatherDashboard.jpg)
-![weatherDashboard iphoneX](assets/images/weatherDashboard.jpg)
+![weatherDashboard tablet](assets/images/weatherDashboard02.jpg)
+![weatherDashboard iphoneX](assets/images/weatherDashboard03.jpg)

@@ -18,9 +18,13 @@ $(document).ready(function() {
     var APIKey = '20fbd5d33642471f44e32d9d9f0a2317';
     // 'https://api.openweathermap.org/data/2.5/forecast?q=sydney,aus&mode=xml&appid='
 
+    getLocation();
     displayCityArray();
+
+    $(".searchBtn").on("click", searchBtn);
     $(".savedCityBtn").on("click", savedCityBtn);
-    $(".searchBtn").on("click", function(event) {
+
+    function searchBtn(event) {
         // This 'preventDefault' method tells the user agent that if the event does not get explicitly
         // handled, its default action should not be taken as it normally would be.
         event.preventDefault(event);
@@ -33,91 +37,148 @@ $(document).ready(function() {
         cityNameUppercase = cityNameInput.toUpperCase();
         console.log(cityNameInput);
         if(cityNameInput != '') {
-            // Here we are building the URL we need to query the database
-            var queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' +
-            cityNameInput + '&units=imperial&appid=' + APIKey;
-
-            var queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?q=' +
-            cityNameInput + '&appid=' + APIKey;
-
-            // Here we run our AJAX call to the OpenWeatherMap API
-            $.ajax({
-            url: queryForcast,
-            method: "GET"
-            })
-            // We store all of the retrieved data inside of an object called "response"
-            .then(function(response) {
-                $('.resultContent').empty();
-                // Log the queryURL
-                console.log(queryForcast);
+            var queryURL;
+            // if (location.protocol === 'http:') {
+            //     queryURL = 'http://api.openweathermap.org/data/2.5/weather?q=' +
+            //     cityNameInput + '&units=imperial&appid=' + APIKey;
+            // }
+            // else {
+            //     queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' +
+            //     cityNameInput + '&units=imperial&appid=' + APIKey;
+            // }
+            ajaxSearch(cityNameInput);          
+            saveToLocal(cityNameInput);
+            displayCityArray();
+            $(".savedCityBtn").on("click", savedCityBtn);
+        }
+        // Transfer content to HTML
+        // $(".city").html("<h1>" + response.name + " Weather Details</h1>");
+        // $(".wind").text("Wind Speed: " + response.wind.speed);
         
-                // Log the resulting object
-                console.log(response);
-                var stringifyResponse = JSON.stringify(response);
-                for(var i = 0; i < 1; i++){
-                    var cityName = JSON.stringify(response.city.name);
-                    var cityLat = JSON.stringify(response.city.coord.lat);
-                    var cityLon = JSON.stringify(response.city.coord.lon);
-                    var cityDate = response.list[i].dt;
-                    var displayDate = moment.unix(cityDate).utc();
-                    var cityWeatherIcon = response.list[i].weather[i-i].icon;
-                    var iconURL = 'http://openweathermap.org/img/w/' + cityWeatherIcon + '.png';
-                    var cityTemp = JSON.stringify(response.list[i].main.temp);
-                    var tempF = (cityTemp - 273.15) * 1.80 + 32;
-                    var cityHumidity = JSON.stringify(response.list[i].main.humidity);
-                    var cityWindSpeed = JSON.stringify(response.list[i].wind.speed);
+        // // Converts the temp to Kelvin with the below formula
+        // var tempF = (response.main.temp - 273.15) * 1.80 + 32;
+        // $(".tempF").text("Temperature (Kelvin) " + tempF);
 
-                    console.log(cityDate);
-                    console.log(displayDate.toString());
-                    console.log('Temperature: ' + tempF.toFixed(2) + '\xB0F');
+        // Log the data in the console as well
+        // console.log("Wind Speed: " + response.wind.speed);
+    }
 
+    function savedCityBtn(event) {
+        // This 'preventDefault' method tells the user agent that if the event does not get explicitly
+        // handled, its default action should not be taken as it normally would be.
+        event.preventDefault(event);
+        // The stopPropagation() method stops the bubbling of an event to parent elements, preventing
+        // any parent handlers from being notified of the event. You can use the method event.isPropagationStopped()
+        // to know whether this method was ever called (on that event object).
+        event.stopPropagation(event);
+        console.log("city button clicked");
+        var cityNameInput = $(this).attr('data-value').trim();
+        console.log(cityNameInput);
+
+        ajaxSearch(cityNameInput);
+    }
+    function geoLocationWeather(latitude,longitude){
+        // Here we are building the URL we need to query the database
+        var queryURL = 'https://api.openweathermap.org/data/2.5/weather?lat=' +
+        latitude + '&lon=' + longitude + '&appid=' + APIKey;
+        // Here we run our AJAX call to the OpenWeatherMap API
+        $.ajax({
+        url: queryURL,
+        method: "GET"
+        })
+        // We store all of the retrieved data inside of an object called "response"
+        .then(function(response) {
+            $('.resultContent').empty();
+            // Log the queryURL
+            console.log(queryURL);
+            // Log the resulting object
+            console.log(response);
+            var stringifyResponse = JSON.stringify(response);
+            for(var i = 0; i < 1; i++){
+                var cityName = JSON.stringify(response.name);
+                var cityLat = JSON.stringify(response.coord.lat);
+                var cityLon = JSON.stringify(response.coord.lon);
+                var cityDate = response.dt;
+                var displayDate = moment.unix(cityDate).utc();
+                var cityWeatherIcon = response.weather[i-i].icon;
+                var iconURL = 'http://openweathermap.org/img/w/' + cityWeatherIcon + '.png';
+                var cityTemp = JSON.stringify(response.main.temp);
+                var tempF = (cityTemp - 273.15) * 1.80 + 32;
+                var cityHumidity = JSON.stringify(response.main.humidity);
+                var cityWindSpeed = JSON.stringify(response.wind.speed);
+
+                console.log(cityDate);
+                console.log(displayDate.toString());
+                console.log('Temperature: ' + tempF.toFixed(2) + '\xB0F');
+                // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
+                $.ajax({
+                url: 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
+                APIKey + '&lat=' + cityLat + '&lon=' + cityLon,
+                method: "GET"
+                })
+                // We store all of the retrieved data inside of an object called "response"
+                .then(function(uvResponse) {
+                    $('.resultContent').empty();
+                    // Log the queryURL
+                    console.log(uvResponse);
+                    var cityUVIndex = JSON.stringify(uvResponse.value);
+                    console.log(cityUVIndex);
+                    // var stringifyResponse = JSON.stringify(response);
+                    var displayDiv = $('<div>').addClass('displayDiv col-md-12');
+                    var title01El = $('<div>').addClass('currentDay col-md-12');
+                    var title02El = $('<div>').addClass('currentDay col-md-12');
+                    var cityNameEl = $('<div>').addClass('currentDay col-md-9');
+                    var tempFEl = $('<div>').addClass('currentDay col-md-12');
+                    var cityHumidityEl = $('<div>').addClass('currentDay col-md-12');
+                    var cityWindSpeedEl = $('<div>').addClass('currentDay col-md-12');
+                    var row01El = $('<div>').addClass('row');
+                    var cityUVIndexTitleEl = $('<div>').addClass('currentDay');
+                    var cityUVIndexValueEl = $('<div>').addClass('currentDay');
+                    var weatherIconEl = $('<div>').addClass('currentDay col-md-4')
+                    var weatherIcon = $('<img>').addClass('weatherIcon'); 
+
+                    weatherIcon.css('text-align', 'left');
+                    weatherIcon.attr('src', iconURL)
+                    displayDiv.attr('dataIndex', i);
+                    displayDiv.css({'border': 'solid', 'border-width': '1px', 'border-color': '#777777', 'padding-bottom': '20px'});
+                    cityUVIndexTitleEl.css({'margin-bottom': '10px', 'margin-left': '30px', 'margin-right': '10px'});
+                    cityUVIndexValueEl.css({'background-color': '#ff0000', 'color': '#ffffff', 'margin-bottom': '10px', 'padding-left': '5px', 'padding-right': '5px', 'border-radius': '5px'});
+                    $('.resultContent').append(displayDiv);
+
+                    title01El.html('<h3>Current Location</h3>');
+                    title02El.html('<h3>5-Day Forcast:</h3>');
+                    cityNameEl.html('<h3>' + cityName + ' ' + displayDate.format('DD/MM/YYYY') + '</h3>');
+                    tempFEl.text('Temperature: ' + tempF.toFixed(2) + '\xB0F');
+                    cityHumidityEl.text('Humidity: ' + cityHumidity + '\u0025');
+                    cityWindSpeedEl.text('Wind Speed: ' + cityWindSpeed + ' MPH');
+                    cityUVIndexTitleEl.text('UV Index:');
+                    cityUVIndexValueEl.text(cityUVIndex);
+
+                    displayDiv.append(title01El);
+                    displayDiv.append(cityNameEl);
+                    displayDiv.append(weatherIconEl);
+                    weatherIconEl.append(weatherIcon);
+                    displayDiv.append(tempFEl);
+                    displayDiv.append(cityHumidityEl);
+                    displayDiv.append(cityWindSpeedEl);
+                    displayDiv.append(row01El);
+                    row01El.append(cityUVIndexTitleEl);
+                    row01El.append(cityUVIndexValueEl);
+                    displayDiv.append(title02El);
+
+                    var queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?lat=' +
+                    cityLat + '&lon=' + cityLon + '&appid=' + APIKey;
                     // Here we run our AJAX call to the OpenWeatherMap UltraViolet API
                     $.ajax({
-                    url: 'https://api.openweathermap.org/data/2.5/uvi?appid=' +
-                    APIKey + '&lat=' + cityLat + '&lon=' + cityLon,
+                    url: queryForcast,
                     method: "GET"
                     })
                     // We store all of the retrieved data inside of an object called "response"
-                    .then(function(uvResponse) {
-                        $('.resultContent').empty();
-                        // Log the queryURL
-                        console.log(uvResponse);
-                        var cityUVIndex = JSON.stringify(uvResponse.value);
-                        console.log(cityUVIndex);
-
-                        // Log the resulting object
-                        console.log(response);
-                        // var stringifyResponse = JSON.stringify(response);
-                        var displayDiv = $('<div>').addClass('displayDiv col-md-12');
-                        var cityNameEl = $('<div>').addClass('currentDay col-md-12');
-                        var tempFEl = $('<div>').addClass('currentDay col-md-12');
-                        var cityHumidityEl = $('<div>').addClass('currentDay col-md-12');
-                        var cityWindSpeedEl = $('<div>').addClass('currentDay col-md-12');
-                        var cityUVIndexEl = $('<div>').addClass('currentDay col-md-12');
-                        var weatherIcon = $('<img>').addClass('weatherIcon'); 
-
-                        weatherIcon.attr('src', iconURL)
-                        displayDiv.attr('dataIndex', i);
-                        displayDiv.css({'border': 'solid', 'border-width': '1px', 'border-color': '#777777', 'padding-bottom': '20px'});
-                        cityUVIndexEl.css({'background-color': '#ff0000', 'color': '#ffffff', 'margin-bottom': '10px'});
-                        $('.resultContent').append(displayDiv);
-
-                        cityNameEl.html('<h3>' + cityName + displayDate.format('DD/MM/YYYY') + '</h3>');
-                        tempFEl.text('Temperature: ' + tempF.toFixed(2) + '\xB0F');
-                        cityHumidityEl.text('Humidity: ' + cityHumidity + '\u0025');
-                        cityWindSpeedEl.text('Wind Speed: ' + cityWindSpeed + ' MPH');
-                        cityUVIndexEl.text('UV Index: ' + cityUVIndex);
-
-                        displayDiv.append(cityNameEl);
-                        displayDiv.append(weatherIcon);
-                        displayDiv.append(tempFEl);
-                        displayDiv.append(cityHumidityEl);
-                        displayDiv.append(cityWindSpeedEl);
-                        displayDiv.append(cityUVIndexEl);
-
+                    .then(function(response) {
                         var forcastRow = $('<div>').addClass('row');
                         forcastRow.css('font-size', '12px')
                         displayDiv.append(forcastRow);
+                        console.log(response);
 
                         for(i = 0; i < 5; i++) {
                             cityDate = response.list[i * 8].dt;
@@ -148,43 +209,19 @@ $(document).ready(function() {
                             forcastDiv.append(tempFEl);
                             forcastDiv.append(cityHumidityEl);
                         }
-                        
-                        saveToLocal(cityNameInput);
-                        displayCityArray();
-                        $(".savedCityBtn").on("click", savedCityBtn);
                     });
-                }
-                // Transfer content to HTML
-                // $(".city").html("<h1>" + response.name + " Weather Details</h1>");
-                // $(".wind").text("Wind Speed: " + response.wind.speed);
-                
-                // // Converts the temp to Kelvin with the below formula
-                // var tempF = (response.main.temp - 273.15) * 1.80 + 32;
-                // $(".tempF").text("Temperature (Kelvin) " + tempF);
-        
-                // Log the data in the console as well
-                // console.log("Wind Speed: " + response.wind.speed);
-            });
-        }
-    });
+                });
+            }
+        });
+    }
 
-    function savedCityBtn(event) {
-        // This 'preventDefault' method tells the user agent that if the event does not get explicitly
-        // handled, its default action should not be taken as it normally would be.
-        event.preventDefault(event);
-        // The stopPropagation() method stops the bubbling of an event to parent elements, preventing
-        // any parent handlers from being notified of the event. You can use the method event.isPropagationStopped()
-        // to know whether this method was ever called (on that event object).
-        event.stopPropagation(event);
-        console.log("city button clicked");
-        var cityNameInput = $(this).attr('data-value').trim();
-        console.log(cityNameInput);
+    function ajaxSearch(b){
         // Here we are building the URL we need to query the database
         var queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' +
-        cityNameInput + '&units=imperial&appid=' + APIKey;
+        b + '&units=imperial&appid=' + APIKey;
 
         var queryForcast = 'https://api.openweathermap.org/data/2.5/forecast?q=' +
-        cityNameInput + '&appid=' + APIKey;
+        b + '&appid=' + APIKey;
 
         // Here we run our AJAX call to the OpenWeatherMap API
         $.ajax({
@@ -234,32 +271,44 @@ $(document).ready(function() {
                     // Log the resulting object
                     console.log(response);
                     // var stringifyResponse = JSON.stringify(response);
-                    var displayDiv = $('<div>').addClass('displayDiv col-md-12');
-                    var cityNameEl = $('<div>').addClass('currentDay col-md-12');
-                    var tempFEl = $('<div>').addClass('currentDay col-md-12');
-                    var cityHumidityEl = $('<div>').addClass('currentDay col-md-12');
-                    var cityWindSpeedEl = $('<div>').addClass('currentDay col-md-12');
-                    var cityUVIndexEl = $('<div>').addClass('currentDay col-md-12');
-                    var weatherIcon = $('<img>').addClass('weatherIcon'); 
+                    displayDiv = $('<div>').addClass('displayDiv col-md-12');
+                    title02El = $('<div>').addClass('currentDay col-md-12');
+                    cityNameEl = $('<div>').addClass('currentDay col-md-9');
+                    tempFEl = $('<div>').addClass('currentDay col-md-12');
+                    cityHumidityEl = $('<div>').addClass('currentDay col-md-12');
+                    cityWindSpeedEl = $('<div>').addClass('currentDay col-md-12');
+                    row01El = $('<div>').addClass('row');
+                    cityUVIndexTitleEl = $('<div>').addClass('currentDay');
+                    cityUVIndexValueEl = $('<div>').addClass('currentDay');
+                    weatherIconEl = $('<div>').addClass('currentDay col-md-4')
+                    weatherIcon = $('<img>').addClass('weatherIcon'); 
 
+                    weatherIcon.css('text-align', 'left');
                     weatherIcon.attr('src', iconURL)
                     displayDiv.attr('dataIndex', i);
                     displayDiv.css({'border': 'solid', 'border-width': '1px', 'border-color': '#777777', 'padding-bottom': '20px'});
-                    cityUVIndexEl.css({'background-color': '#ff0000', 'color': '#ffffff', 'margin-bottom': '10px'});
+                    cityUVIndexTitleEl.css({'margin-bottom': '10px', 'margin-left': '30px', 'margin-right': '10px'});
+                    cityUVIndexValueEl.css({'background-color': '#ff0000', 'color': '#ffffff', 'margin-bottom': '10px', 'padding-left': '5px', 'padding-right': '5px', 'border-radius': '5px'});
                     $('.resultContent').append(displayDiv);
 
-                    cityNameEl.html('<h3>' + cityName + displayDate.format('DD/MM/YYYY') + '</h3>');
+                    title02El.html('<h3>5-Day Forcast:</h3>');
+                    cityNameEl.html('<h3>' + cityName + ' ' + displayDate.format('DD/MM/YYYY') + '</h3>');
                     tempFEl.text('Temperature: ' + tempF.toFixed(2) + '\xB0F');
                     cityHumidityEl.text('Humidity: ' + cityHumidity + '\u0025');
                     cityWindSpeedEl.text('Wind Speed: ' + cityWindSpeed + ' MPH');
-                    cityUVIndexEl.text('UV Index: ' + cityUVIndex);
+                    cityUVIndexTitleEl.text('UV Index:');
+                    cityUVIndexValueEl.text(cityUVIndex);
 
                     displayDiv.append(cityNameEl);
-                    displayDiv.append(weatherIcon);
+                    displayDiv.append(weatherIconEl);
+                    weatherIconEl.append(weatherIcon);
                     displayDiv.append(tempFEl);
                     displayDiv.append(cityHumidityEl);
                     displayDiv.append(cityWindSpeedEl);
-                    displayDiv.append(cityUVIndexEl);
+                    displayDiv.append(row01El);
+                    row01El.append(cityUVIndexTitleEl);
+                    row01El.append(cityUVIndexValueEl);
+                    displayDiv.append(title02El);
 
                     var forcastRow = $('<div>').addClass('row');
                     forcastRow.css('font-size', '12px')
@@ -297,7 +346,27 @@ $(document).ready(function() {
                 });
             }
         });
-    };
+    }
+
+    function getLocation() {
+        // Make sure browser supports this feature
+        if (navigator.geolocation) {
+            // Provide our showPosition() function to getCurrentPosition
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } 
+        else {
+          alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // This will get called after getCurrentPosition()
+    function showPosition(position) {
+        // Grab coordinates from the given object
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
+        console.log("Your coordinates are Latitude: " + lat + " Longitude " + lon);
+        geoLocationWeather(lat,lon);
+    }
 
     function search(key, inputArray) {
         for (i = 0; i < inputArray.length; i++) {

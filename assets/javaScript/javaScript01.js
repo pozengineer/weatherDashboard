@@ -364,6 +364,7 @@ $(document).ready(function() {
                             forcastDiv.append(cityHumidityEl);
                             saveToLocal(b);
                             displayCityArray();
+                            $(".savedCityBtn").on("click", savedCityBtn);
                         }
                     });                  
                 }

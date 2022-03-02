@@ -191,9 +191,9 @@ hr {
 /* .wrapper {
     min-height: 100%;
     margin-bottom: -50px;
-} */
+}
 
-/* .footer,
+.footer,
 .push {
     height: 50px;
 } */
@@ -203,8 +203,8 @@ hr {
     margin: 0;
     text-align: center;
     font-size: 14px;
-    padding-top: 35px;
-    padding-bottom: 5px;
+    /* padding-top: 35px; */
+    padding-bottom: 35px !important;
     border-top: solid;
     border-width: 5px;
     border-color: #0a00ff;

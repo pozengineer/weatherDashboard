@@ -15,7 +15,7 @@ $(document).ready(function() {
     var currentQuesIndex = 0;
     var currentHour = 0;
     // This is our API key
-    var APIKey = '20fbd5d33642471f44e32d9d9f0a2317';
+    var APIKey = 'e39317bff5582c590db2529919ced55b';
     // 'https://api.openweathermap.org/data/2.5/forecast?q=sydney,aus&mode=xml&appid='
     var queryURL;
 

@@ -2,7 +2,12 @@
 
 Summary
 
-The web application is a weather dashboard that enables the user to
+The web application is a weather dashboard that enables the user to search any city in the world, and the
+application will display a response with the current weather conditions of that city as well as a five day
+forcast provided by a weather API. The application enables the user to store their searches in local storage
+and then creates button elements which will provide the same information when clicked. An additional feature
+of the application is that it utilses geolocation of the device to display the weather conditions of the city
+the user is currently in.
 
 The application uses 'addEventListener' so that when one of the buttons is clicked on, it will initiate
 the associated function. The use of 'preventDefault' and 'stopPropagation' methods are used to prevent
